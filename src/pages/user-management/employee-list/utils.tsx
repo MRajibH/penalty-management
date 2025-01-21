@@ -23,12 +23,13 @@ import useBoolean, { UseBooleanType } from "@/hooks/use-boolean";
 import { Separator } from "@/components/ui/separator";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTableRowActions } from "@/components/data-table/DataTableRowActions";
-import { employeesType } from "@/context/dataContext";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { deleteDoc, doc } from "firebase/firestore";
 import { employeeRef } from "@/db/firebase.db";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { employeesType } from "@/context/data-context/types";
+import { useDataContext } from "@/context";
 
 export const CreateEmployee = () => {
   const { open, setOpen, onClose } = useBoolean();
@@ -123,7 +124,16 @@ export const columns: ColumnDef<any>[] = [
     enableHiding: true,
   },
   {
-    accessorKey: "designation_name",
+    accessorKey: "phone",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Phone" />
+    ),
+    cell: ({ row }) => <div>{row.getValue("phone")}</div>,
+    enableSorting: true,
+    enableHiding: true,
+  },
+  {
+    accessorKey: "designation_id",
     header: ({ column }) => (
       <DataTableColumnHeader
         align="center"
@@ -131,14 +141,18 @@ export const columns: ColumnDef<any>[] = [
         title="Designation"
       />
     ),
-    cell: ({ row }) => (
-      <div className="text-center">{row.getValue("designation_name")}</div>
-    ),
+    cell: ({ row }) => {
+      const { designationMapped } = useDataContext();
+      const id: string = row.getValue("designation_id");
+      const { designation_name } = designationMapped[id];
+
+      return <div className="text-center">{designation_name}</div>;
+    },
     enableSorting: true,
     enableHiding: true,
   },
   {
-    accessorKey: "department_name",
+    accessorKey: "designation_id",
     header: ({ column }) => (
       <DataTableColumnHeader
         align="center"
@@ -146,9 +160,14 @@ export const columns: ColumnDef<any>[] = [
         title="Department"
       />
     ),
-    cell: ({ row }) => (
-      <div className="text-center">{row.getValue("department_name")}</div>
-    ),
+    cell: ({ row }) => {
+      const { departmentMapped, designationMapped } = useDataContext();
+      const id: string = row.getValue("designation_id");
+      const { department_id } = designationMapped[id];
+      const { department_name } = departmentMapped[department_id];
+
+      return <div className="text-center">{department_name}</div>;
+    },
     enableSorting: true,
     enableHiding: true,
   },

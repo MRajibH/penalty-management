@@ -16,7 +16,6 @@ import { addDoc, doc, updateDoc } from "firebase/firestore";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useDataContext } from "@/context/dataContext";
 import {
   Popover,
   PopoverContent,
@@ -33,9 +32,10 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { useToast } from "@/hooks/use-toast";
+import { useDataContext } from "@/context";
 
 const DesignationSchema = z.object({
-  department_name: z.string(),
+  department_id: z.string(),
   designation_name: z.string(),
 });
 
@@ -61,7 +61,7 @@ const DesignationForm = ({
 
   const form = useForm<DesignationSchemaType>({
     mode: "onChange",
-    defaultValues: defaultValue || { department_name: "" },
+    defaultValues: defaultValue || {},
     resolver: zodResolver(DesignationSchema),
   });
 
@@ -83,7 +83,8 @@ const DesignationForm = ({
       // for updating
       else if (componentFor === "update" && defaultValue?.id) {
         const { id } = defaultValue;
-        await updateDoc(doc(designationRef, id), new_data);
+        const { createdAt, ...updated_data } = new_data;
+        await updateDoc(doc(designationRef, id), updated_data);
       }
 
       onClose();
@@ -154,8 +155,7 @@ const DesignationForm = ({
                                   {field.value
                                     ? departments.find(
                                         (department) =>
-                                          department.department_name ===
-                                          field.value
+                                          department.id === field.value
                                       )?.department_name
                                     : "Select department"}
                                   <ChevronsUpDown className="opacity-50" />
@@ -179,10 +179,7 @@ const DesignationForm = ({
                                           key={id}
                                           value={department_name}
                                           onSelect={() => {
-                                            form.setValue(
-                                              "department_name",
-                                              department_name
-                                            );
+                                            form.setValue("department_id", id);
                                             setOpen(false);
                                           }}
                                         >
@@ -190,7 +187,7 @@ const DesignationForm = ({
                                           <Check
                                             className={cn(
                                               "ml-auto",
-                                              department_name === field.value
+                                              id === field.value
                                                 ? "opacity-100"
                                                 : "opacity-0"
                                             )}
@@ -236,7 +233,7 @@ type fieldType = {
   description: string;
   placeholder: string;
   inputType: "text" | "select";
-  name: "department_name" | "designation_name";
+  name: "department_id" | "designation_name";
 };
 
 const fields: fieldType[] = [
@@ -249,7 +246,7 @@ const fields: fieldType[] = [
     placeholder: "Enter a designation name ...",
   },
   {
-    name: "department_name",
+    name: "department_id",
     label: "Department Name",
     description:
       "Select the department this designation belongs to, e.g., 'DevSecOps'.",

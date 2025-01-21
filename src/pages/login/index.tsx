@@ -15,25 +15,29 @@ import { FaGithub } from "react-icons/fa6";
 import { FcGoogle } from "react-icons/fc";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
-import { useAuthContext } from "@/context/authContext";
+import { useAuthContext } from "@/context";
 
 const LoginView = () => {
   const { toast } = useToast();
-  const { sign_in } = useAuthContext();
+  const { SignIn } = useAuthContext();
 
-  const [user, setUser] = useState("");
   const [pass, setPass] = useState("");
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
 
     try {
-      await sign_in({ user, pass });
+      setLoading(true);
+      await SignIn({ email, pass });
     } catch (err: any) {
       toast({
-        title: err,
+        title: err.message,
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -60,13 +64,15 @@ const LoginView = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Input
-                  name="user"
-                  type="text"
-                  value={user}
-                  placeholder="Enter username"
-                  onChange={(e) => setUser(e.target.value)}
+                  required
+                  name="email"
+                  type="email"
+                  value={email}
+                  placeholder="Enter email"
+                  onChange={(e) => setEmail(e.target.value)}
                 />
                 <Input
+                  required
                   value={pass}
                   name="password"
                   type="password"
@@ -74,7 +80,7 @@ const LoginView = () => {
                   onChange={(e) => setPass(e.target.value)}
                 />
               </div>
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full" loading={loading}>
                 Continue
               </Button>
             </form>

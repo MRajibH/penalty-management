@@ -15,7 +15,6 @@ import DepartmentForm from "./DepartmentForm";
 import useBoolean, { UseBooleanType } from "@/hooks/use-boolean";
 import { Separator } from "@/components/ui/separator";
 import { DataTableRowActions } from "@/components/data-table/DataTableRowActions";
-import { departmentType } from "@/context/dataContext";
 import {
   Dialog,
   DialogContent,

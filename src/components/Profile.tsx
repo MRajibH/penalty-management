@@ -12,7 +12,7 @@ import { PiCaretUpDownBold } from "react-icons/pi";
 import { Settings2, User } from "lucide-react";
 import { FiLogOut } from "react-icons/fi";
 import { cn } from "@/lib/utils";
-import { useAuthContext } from "@/context/authContext";
+import { useAuthContext } from "@/context/";
 import { Link } from "react-router-dom";
 
 interface ProfileProps {
@@ -21,7 +21,7 @@ interface ProfileProps {
 }
 
 const Profile = ({ className, iconOnly = false }: ProfileProps) => {
-  const { sign_out } = useAuthContext();
+  const { SignOut } = useAuthContext();
 
   return (
     <div className={cn("", className)}>
@@ -71,7 +71,7 @@ const Profile = ({ className, iconOnly = false }: ProfileProps) => {
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuItem
-            onClick={sign_out}
+            onClick={SignOut}
             className="text-red-600 hover:text-red-600 hover:bg-red-50"
           >
             <FiLogOut />

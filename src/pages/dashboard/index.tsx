@@ -3,18 +3,14 @@ import { Filters } from "@/components/Filters";
 import { PenaltyCard } from "@/components/PenaltyCard";
 import { SearchBar } from "@/components/SearchBar";
 import { Stats } from "@/components/Stats";
-import { buttonVariants } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { useAuthContext } from "@/context/authContext";
+import { useAuthContext } from "@/context";
 import { penaltyCollectionRef } from "@/db/firebase.db";
-import { cn } from "@/lib/utils";
 import { Penalty, SearchFilters } from "@/types";
 import { doc, onSnapshot, updateDoc } from "firebase/firestore";
-import { LogIn } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { IoFilter } from "react-icons/io5";
-import { Link } from "react-router-dom";
 
 const today = new Date();
 const last30Days = new Date();
@@ -31,7 +27,7 @@ const initialFilters: SearchFilters = {
 };
 
 const Dashboard = () => {
-  const { isLoggedIn } = useAuthContext();
+  const { currentUser } = useAuthContext();
 
   const [filters, setFilters] = useState<SearchFilters>(initialFilters);
   const [penalties, setPenalties] = useState<Penalty[]>([]);
@@ -102,7 +98,7 @@ const Dashboard = () => {
           Penalty Management System
         </h1>
 
-        {isLoggedIn && <AddPenaltyForm />}
+        {currentUser && <AddPenaltyForm />}
       </div>
 
       <Stats stats={stats} />

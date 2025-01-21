@@ -15,7 +15,6 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
-import { designationType } from "@/context/dataContext";
 import {
   Dialog,
   DialogContent,
@@ -28,6 +27,8 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { deleteDoc, doc } from "firebase/firestore";
 import { designationRef } from "@/db/firebase.db";
+import { designationType } from "@/context/data-context/types";
+import { useDataContext } from "@/context";
 
 export const CreateDesignation = () => {
   const { open, setOpen, onClose } = useBoolean(false);
@@ -89,13 +90,17 @@ export const columns: ColumnDef<any>[] = [
     enableHiding: true,
   },
   {
-    accessorKey: "department_name",
+    accessorKey: "department_id",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Department Name" />
     ),
-    cell: ({ row }) => (
-      <div className="w-full">{row.getValue("department_name")}</div>
-    ),
+    cell: ({ row }) => {
+      const { departmentMapped } = useDataContext();
+      const id: string = row.getValue("department_id");
+      const departmentName = departmentMapped[id].department_name;
+
+      return <div className="w-full">{departmentName}</div>;
+    },
     enableSorting: true,
     enableHiding: true,
   },

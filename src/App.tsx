@@ -1,8 +1,7 @@
 import { HashRouter } from "react-router-dom";
 import RootRouter from "./routes/RootRouter";
-import { AuthContextProvider } from "./context/authContext";
 import { Toaster } from "./components/ui/toaster";
-import { DataContextProvider } from "./context/dataContext";
+import { AuthContextProvider, DataContextProvider } from "@/context";
 
 function App() {
   return (

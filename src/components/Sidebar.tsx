@@ -3,7 +3,7 @@ import { Nav } from "./Nav";
 import Profile from "./Profile";
 import { Separator } from "./ui/separator";
 import { BookOpen, Home, Settings, Settings2, Users2 } from "lucide-react";
-import { useAuthContext } from "@/context/authContext";
+import { useAuthContext } from "@/context";
 interface SidebarProps {
   isCollapsed: boolean;
 }
@@ -49,7 +49,7 @@ export const Logo = ({ className }: { className?: string }) => (
 );
 
 export const Sidebar = ({ isCollapsed }: SidebarProps) => {
-  const { isLoggedIn } = useAuthContext();
+  const { currentUser } = useAuthContext();
 
   return (
     <div className="flex flex-col h-full">
@@ -128,7 +128,7 @@ export const Sidebar = ({ isCollapsed }: SidebarProps) => {
         ]}
       />
 
-      {isLoggedIn && (
+      {currentUser && (
         <>
           <Separator />
           <Profile

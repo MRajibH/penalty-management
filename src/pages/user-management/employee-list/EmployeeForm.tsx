@@ -23,12 +23,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { designationType, useDataContext } from "@/context/dataContext";
-import { designationRef, employeeRef } from "@/db/firebase.db";
+import { useDataContext } from "@/context";
+import { employeeRef } from "@/db/firebase.db";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { addDoc, doc, getDoc, updateDoc } from "firebase/firestore";
+import { addDoc, doc, updateDoc } from "firebase/firestore";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -40,6 +40,7 @@ const EmployeeFormSchema = z.object({
     .min(4, { message: "Name must be greater then 3 characters." })
     .max(30, { message: "Name can not be longer than 30 characters." }),
   email: z.string().email("Must be a valid email address."),
+  phone: z.string(),
   designation_id: z.string(),
 });
 
@@ -48,11 +49,7 @@ type EmployeeFormSchemaType = z.infer<typeof EmployeeFormSchema>;
 interface EmployeeFormProps {
   onClose: any;
   componentFor?: "update" | "create";
-  defaultValue?: EmployeeFormSchemaType & {
-    id: string;
-    department_name: string;
-    designation_name: string;
-  };
+  defaultValue?: EmployeeFormSchemaType & { id: string };
 }
 
 const EmployeeForm = ({
@@ -64,7 +61,7 @@ const EmployeeForm = ({
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const { designations } = useDataContext();
+  const { designations, designationMapped } = useDataContext();
 
   const form = useForm<EmployeeFormSchemaType>({
     mode: "onChange",
@@ -73,17 +70,9 @@ const EmployeeForm = ({
   });
 
   const onSubmit = async (data: EmployeeFormSchemaType) => {
-    const { designation_id } = data;
     try {
       setLoading(true);
-      const docRef = doc(designationRef, designation_id);
-      const designationSnapshot = await getDoc(docRef);
-      const designationData = designationSnapshot.data() as designationType;
-      const { department_name, designation_name } = designationData;
-
       const new_data = {
-        department_name,
-        designation_name,
         createdAt: new Date().getTime(),
         modifiedAt: new Date().getTime(),
         ...data,
@@ -96,8 +85,10 @@ const EmployeeForm = ({
       // for updating
       else if (componentFor === "update" && defaultValue?.id) {
         const { id } = defaultValue;
-        await updateDoc(doc(employeeRef, id), new_data);
+        const { createdAt, ...updated_data } = new_data;
+        await updateDoc(doc(employeeRef, id), updated_data);
       }
+
       onClose();
     } catch (err: any) {
       toast({
@@ -164,10 +155,8 @@ const EmployeeForm = ({
                                   )}
                                 >
                                   {field.value
-                                    ? designations.find(
-                                        (designation) =>
-                                          designation.id === field.value
-                                      )?.designation_name
+                                    ? designationMapped[field.value]
+                                        ?.designation_name
                                     : placeholder}
                                   <ChevronsUpDown className="opacity-50" />
                                 </Button>
@@ -268,7 +257,7 @@ type fieldType = {
   description: string;
   placeholder: string;
   inputType: "text" | "select" | "file";
-  name: "name" | "email" | "designation_id";
+  name: "name" | "email" | "phone" | "designation_id";
 };
 
 const fields: fieldType[] = [
@@ -286,6 +275,13 @@ const fields: fieldType[] = [
     placeholder: "john.doe@example.com",
     description:
       "Enter the employee's official email address, e.g., 'john.doe@example.com'.",
+  },
+  {
+    name: "phone",
+    label: "Phone",
+    inputType: "text",
+    placeholder: "Phone number",
+    description: "Enter the employee's phone number, e.g., '01756160530'.",
   },
   {
     name: "designation_id",
